@@ -1,2 +1,6 @@
 # Project exclude paths
 /target/
+/Calculator.iws
+/Calculator.iml
+/Calculator.ipr
+/.idea/
