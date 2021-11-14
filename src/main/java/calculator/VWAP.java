@@ -16,14 +16,15 @@ public class VWAP implements Calculator {
 
     @Override
     public VWAPTwoWayPrice applyMarketUpdate(MarketUpdate marketUpdate) {
-        instrumentMap.computeIfAbsent(marketUpdate.getTwoWayPrice().getInstrument(), k -> new ArrayList<>()).add(marketUpdate);
-        List<MarketUpdate> marketUpdates = getMarketUpdatesForInstruments(marketUpdate.getMarket());
+        Instrument instrument = marketUpdate.getTwoWayPrice().getInstrument();
+        instrumentMap.computeIfAbsent(instrument, k -> new ArrayList<>()).add(marketUpdate);
+        List<MarketUpdate> marketUpdates = getMarketUpdatesForInstruments(instrument, marketUpdate.getMarket());
 
         double bidPrice = calculateBid(marketUpdates);
         double officePrice = calculateOffer(marketUpdates);
 
         return new VWAPTwoWayPrice(
-                marketUpdate.getTwoWayPrice().getInstrument(),
+                instrument,
                 marketUpdate.getTwoWayPrice().getState(),
                 bidPrice,
                 marketUpdate.getTwoWayPrice().getBidAmount(),
@@ -32,9 +33,9 @@ public class VWAP implements Calculator {
         );
     }
 
-    List<MarketUpdate> getMarketUpdatesForInstruments(Market market) {
-        return instrumentMap.get(Instrument.INSTRUMENT0).stream()
-                .filter(VWAPTwoWayPrice -> VWAPTwoWayPrice.getMarket().equals(market))
+    List<MarketUpdate> getMarketUpdatesForInstruments(Instrument instrument, Market market) {
+        return instrumentMap.get(instrument).stream()
+                .filter(MarketUpdate -> MarketUpdate.getMarket().equals(market))
                 .collect(Collectors.toList());
     }
 
@@ -53,7 +54,7 @@ public class VWAP implements Calculator {
         double sumAmounts = 0;
         for (MarketUpdate marketUpdate : marketUpdates) {
             sumOffers += marketUpdate.getTwoWayPrice().getOfferPrice() * marketUpdate.getTwoWayPrice().getOfferAmount();
-            sumAmounts += marketUpdate.getTwoWayPrice().getBidAmount();
+            sumAmounts += marketUpdate.getTwoWayPrice().getOfferAmount();
         }
         return sumOffers / sumAmounts;
     }
