@@ -1,15 +1,11 @@
 package calculator;
 
-import domain.Instrument;
-import domain.Market;
 import domain.MarketUpdate;
 import domain.TwoWayPrice;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static domain.Instrument.INSTRUMENT0;
 import static domain.Market.MARKET0;
@@ -108,55 +104,4 @@ class VWAPTest {
         assertEquals(10, vwap3.getOfferPrice());
         assertEquals(13.33, vwap4.getOfferPrice(), 0.01);
     }
-
-
-    @Test
-    public void vwapForManyMarketUpdate() {
-        VWAP vwapCalculator = new VWAP();
-        Map<Market, ArrayList<VWAPTwoWayPrice>> vwapTwoWayPricesForMarket = new HashMap<>();
-        Map<Market, ArrayList<MarketUpdate>> marketUpdateForInstrumentMarkets = new HashMap<>();
-
-        IntStream.range(1, 1000).forEach(x -> {
-            double bidPrice = ThreadLocalRandom.current().nextDouble();
-            double bidAmount = ThreadLocalRandom.current().nextDouble();
-            double offerPrice = ThreadLocalRandom.current().nextDouble();
-            double offerAmount = ThreadLocalRandom.current().nextDouble();
-
-            Market market = Market.class.getEnumConstants()[new Random().nextInt(Market.class.getEnumConstants().length)];
-            Instrument instrument = Instrument.class.getEnumConstants()[new Random().nextInt(Instrument.class.getEnumConstants().length)];
-
-            MarketUpdate marketUpdate = new VWAPMarketUpdate(market, new VWAPTwoWayPrice(instrument, FIRM, bidPrice, bidAmount, offerPrice, offerAmount));
-            VWAPTwoWayPrice vwapTwoWayPrice = vwapCalculator.applyMarketUpdate(marketUpdate);
-            vwapTwoWayPricesForMarket.computeIfAbsent(market, k -> new ArrayList<>()).add(vwapTwoWayPrice);
-            marketUpdateForInstrumentMarkets.computeIfAbsent(market, k -> new ArrayList<>()).add(marketUpdate);
-        });
-
-        marketUpdateForInstrumentMarkets.forEach((market, marketUpdates) -> {
-            Arrays.stream(Instrument.class.getEnumConstants()).toList().forEach(instrument -> {
-                List<VWAPTwoWayPrice> results = vwapTwoWayPricesForMarket.get(market).stream().filter(x -> x.getInstrument().equals(instrument)).collect(Collectors.toList());
-                List<MarketUpdate> marketUpdatesForInstrument = marketUpdates.stream().filter(x -> x.getTwoWayPrice().getInstrument().equals(instrument)).collect(Collectors.toList());
-                if (results.size() > 0) {
-                    double sumBids = 0;
-                    double sumBidAmounts = 0;
-                    double sumOffers = 0;
-                    double sumOfferAmounts = 0;
-                    for (MarketUpdate marketUpdate : marketUpdatesForInstrument) {
-                        sumBids += marketUpdate.getTwoWayPrice().getBidPrice() * marketUpdate.getTwoWayPrice().getBidAmount();
-                        sumBidAmounts += marketUpdate.getTwoWayPrice().getBidAmount();
-                        sumOffers += marketUpdate.getTwoWayPrice().getOfferPrice() * marketUpdate.getTwoWayPrice().getOfferAmount();
-                        sumOfferAmounts += marketUpdate.getTwoWayPrice().getOfferAmount();
-                    }
-
-                    double expectedBid  = sumBids / sumBidAmounts;
-                    double expectedOffer  = sumOffers / sumOfferAmounts;
-
-                    assertEquals(expectedBid, results.get(results.size() - 1).getBidAmount());
-                    assertEquals(expectedOffer, results.get(results.size() - 1).getOfferAmount());
-                }
-            });
-
-        });
-    }
-
-    ;
 }

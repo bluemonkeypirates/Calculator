@@ -20,9 +20,18 @@ public class VWAP implements Calculator {
         instrumentMap.computeIfAbsent(instrument, k -> new ArrayList<>()).add(marketUpdate);
         List<MarketUpdate> marketUpdates = getMarketUpdatesForInstruments(instrument, marketUpdate.getMarket());
 
-        double bidPrice = calculateBid(marketUpdates);
-        double officePrice = calculateOffer(marketUpdates);
+        double bidPrice=0;
+        double officePrice=0;
+        if(marketUpdate.getTwoWayPrice().getBidAmount() > 0) {
+            //only process bid if there is an amount present
+            bidPrice = calculateBid(marketUpdates);
+        }
+        if(marketUpdate.getTwoWayPrice().getOfferAmount() > 0) {
+            //only process bid if there is an amount present
+            officePrice = calculateOffer(marketUpdates);
+        }
 
+        //assume the state is the same as the update received
         return new VWAPTwoWayPrice(
                 instrument,
                 marketUpdate.getTwoWayPrice().getState(),
