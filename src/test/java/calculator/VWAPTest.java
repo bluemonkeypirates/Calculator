@@ -116,4 +116,30 @@ class VWAPTest {
         assertEquals(12.5, vwap4.getOfferPrice());
         assertEquals(400, vwap4.getOfferAmount());
     }
+
+    @Test
+    public void bidAndOfferForMarketUpdates() {
+        VWAP vwapCalculator = new VWAP();
+        MarketUpdate marketUpdate1 = new VWAPMarketUpdate(MARKET0, new VWAPTwoWayPrice(INSTRUMENT0, FIRM, 10, 100, 10, 100));
+        MarketUpdate marketUpdate2 = new VWAPMarketUpdate(MARKET1, new VWAPTwoWayPrice(INSTRUMENT0, FIRM, 15, 100, 20, 100));
+        MarketUpdate marketUpdate3 = new VWAPMarketUpdate(MARKET2, new VWAPTwoWayPrice(INSTRUMENT0, FIRM, 10, 100, 10, 100));
+        MarketUpdate marketUpdate4 = new VWAPMarketUpdate(MARKET3, new VWAPTwoWayPrice(INSTRUMENT0, FIRM, 20, 100, 10, 100));
+
+        VWAPTwoWayPrice vwap1 = vwapCalculator.applyMarketUpdate(marketUpdate1);
+        VWAPTwoWayPrice vwap2 = vwapCalculator.applyMarketUpdate(marketUpdate2);
+        VWAPTwoWayPrice vwap3 = vwapCalculator.applyMarketUpdate(marketUpdate3);
+        VWAPTwoWayPrice vwap4 = vwapCalculator.applyMarketUpdate(marketUpdate4);
+
+        assertEquals(10, vwap1.getOfferPrice());
+        assertEquals(15, vwap2.getOfferPrice());
+        assertEquals(13.33, vwap3.getOfferPrice(), 0.01);
+        assertEquals(12.5, vwap4.getOfferPrice());
+        assertEquals(400, vwap4.getOfferAmount());
+
+        assertEquals(10, vwap1.getBidPrice());
+        assertEquals(12.5, vwap2.getBidPrice());
+        assertEquals(11.66, vwap3.getBidPrice(), 0.01);
+        assertEquals(13.75, vwap4.getBidPrice());
+        assertEquals(400, vwap4.getBidAmount());
+    }
 }

@@ -23,11 +23,11 @@ public class VWAP implements Calculator {
         CalculatedOffer calculatedOffer = new CalculatedOffer(0,0);
 
         if (marketUpdate.getTwoWayPrice().getBidAmount() > 0) {
-            //only process bid if there is an amount present
+            //only process bid if there is a bid amount present
             calculatedBid = calculateBid(marketUpdates);
         }
         if (marketUpdate.getTwoWayPrice().getOfferAmount() > 0) {
-            //only process bid if there is an amount present
+            //only process offer if there is an offer amount present
             calculatedOffer = calculateOffer(marketUpdates);
         }
 
